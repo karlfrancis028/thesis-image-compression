@@ -1,10 +1,21 @@
+import os
 from PIL import Image
 import pywt
 import heapq
 import collections
 import numpy as np
 import struct
+import time
 
+
+def calculate_compression_ratio(original_image, compressed_image):
+    original_size = os.path.getsize(original_image)
+    compressed_size = os.path.getsize(compressed_image)
+    compression_ratio = compressed_size / original_size
+    print("Compression ratio: {:.2f}".format(compression_ratio))
+
+
+start_time = time.time()
 # Read image file
 img = Image.open('image.jpg')
 
@@ -19,12 +30,13 @@ for y in range(height):
         if x == 0 or y == 0:
             prediction_error = gray_img.getpixel((x, y))
         else:
-            prediction = (gray_img.getpixel((x-1, y)) + gray_img.getpixel((x, y-1))) // 2
+            prediction = (gray_img.getpixel((x - 1, y)) + gray_img.getpixel((x, y - 1))) // 2
             prediction_error = gray_img.getpixel((x, y)) - prediction
         prediction_errors.append(prediction_error)
 
 # Apply integer wavelet transform
-coeffs = pywt.wavedec2(np.array(prediction_errors).reshape((height, width)), 'haar', level=1, mode='symmetric', axes=(0, 1))
+coeffs = pywt.wavedec2(np.array(prediction_errors).reshape((height, width)), 'haar', level=1, mode='symmetric',
+                       axes=(0, 1))
 
 # Discard redundant coefficients
 coeffs_arr = []
@@ -63,4 +75,10 @@ with open('compressed.bin', 'wb') as f:
     # If there are any remaining bits in the bitstream, pad with zeros and write to the file
     if len(bitstream) > 0:
         byte = bitstream + '0' * (8 - len(bitstream))
-        f.write(struct.pack('B', int(byte, 2))))
+        f.write(struct.pack('B', int(byte, 2)))
+
+end_time = time.time()
+print("Image Compression Complete!")
+print("Time taken to compress the image: {:.2f} seconds".format(end_time - start_time))
+
+calculate_compression_ratio("image.jpg", "compressed.bin")
