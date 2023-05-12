@@ -144,6 +144,8 @@ def decompress_image(image_file):
     decompressed_image = Image.fromarray(decompressed_image_array.astype(np.uint8))
     decompressed_image.save("decompressed_image.jpg")
 
+    print("Image Decompression Complete. Check the folder for a file named decompressed_image.jpg")
+
 compress_image("image.jpg")
 calculate_compression_ratio("image.jpg", "compressed_image.bin")
 decompress_image("compressed_image.bin")
