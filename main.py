@@ -15,20 +15,10 @@ def canonical_huffman(coeffs):
         return None
     # Create a frequency table for the data
     frequency_table = {}
-    for arr in coeffs[0]:
-        if arr.shape[0] > 0:
-            for value in arr.flat:
-                if value in frequency_table:
-                    frequency_table[value] += 1
-                else:
-                    frequency_table[value] = 1
-    for arr in coeffs[1]:
-        if arr.shape[0] > 0:
-            for value in arr.flat:
-                if value in frequency_table:
-                    frequency_table[value] += 1
-                else:
-                    frequency_table[value] = 1
+    for arr in np.concatenate(coeffs, axis=None):
+        for value in arr.flat:
+            frequency_table[value] = frequency_table.get(value, 0) + 1
+
     # Create a heap from the frequency table
     heap = [[weight, [symbol, ""]] for symbol, weight in frequency_table.items()]
     heapq.heapify(heap)
@@ -143,6 +133,11 @@ def decompress_image(image_file):
     # Convert the numpy array to a PIL Image and save to file
     decompressed_image = Image.fromarray(decompressed_image_array.astype(np.uint8))
     decompressed_image.save("decompressed_image.jpg")
+
+    #End timer
+    end_time = time.time()
+    print("Image Compression Complete!")
+    print("Time taken to decompress the image: {:.2f} seconds".format(end_time - start_time))
 
 compress_image("image.jpg")
 decompress_image("compressed_image.bin")
