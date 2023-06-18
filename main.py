@@ -10,7 +10,7 @@ from tqdm import tqdm
 #Global Declaration
 coeffs = None
 
-def canonical_huffman(coeffs):
+def enhanced_huffman(coeffs):
     if len(coeffs) == 0:
         return None
     # Create a frequency table for the data
@@ -58,7 +58,7 @@ def compress_image(image_file):
     coeffs = pywt.dwt2(image_array, 'haar')
 
     # Perform Canonical Huffman on DWT Coefficients
-    huffman_code_table = canonical_huffman(coeffs)
+    huffman_code_table = enhanced_huffman(coeffs)
 
     # Compress the data using Huffman encoded coefficients
     compressed_data = bitarray()
@@ -102,7 +102,7 @@ def decompress_image(image_file):
         compressed_data.fromfile(f)
     
     # Perform Canonical Huffman on DWT Coefficients
-    huffman_code_table = canonical_huffman(coeffs)
+    huffman_code_table = enhanced_huffman(coeffs)
 
     # Invert the Huffman code table
     inverse_code_table = {code: symbol for symbol, code in huffman_code_table.items()}
@@ -139,6 +139,17 @@ def decompress_image(image_file):
     print("Image Compression Complete!")
     print("Time taken to decompress the image: {:.2f} seconds".format(end_time - start_time))
 
+def compute_psnr(original_file, compressed_file):
+
+    original_image = np.array(Image.open(original_file))
+    reconstructed_image = np.array(Image.open(compressed_file))
+
+    mse = np.mean((original_image - reconstructed_image) **2)
+    psnr = 10* np.log10((255.0 ** 2) / mse)
+
+    print("PSNR: ", psnr)
+
 compress_image("image.jpg")
 decompress_image("compressed_image.bin")
 calculate_compression_ratio("image.jpg", "decompressed_image.jpg")
+compute_psnr("image.jpg", "decompressed_image.jpg")
